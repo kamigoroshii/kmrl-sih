@@ -59,7 +59,52 @@ from flask_cors import CORS
 CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://localhost:5173"]}}, supports_credentials=True)
 
 # MongoDB setup (users_collection, chats_collection imported from backend.mongodb)
-image_analysis_collection = None  # If needed, add to backend/mongodb.py
+# Initialize image_analysis_collection from mongodb
+try:
+    from mongodb import mongo_client
+    image_analysis_collection = mongo_client[os.getenv("MONGODB_DB_NAME", "document_agent_db")]["image_analysis"]
+except:
+    # Fallback to in-memory collection if MongoDB fails
+    class InMemoryCollection:
+        def __init__(self):
+            self.data = {}
+            self._id_counter = 1
+        
+        def insert_one(self, document):
+            document["_id"] = str(self._id_counter)
+            self.data[self._id_counter] = document
+            self._id_counter += 1
+            return type('obj', (object,), {'inserted_id': document["_id"]})
+        
+        def find_one(self, query):
+            for doc in self.data.values():
+                match = all(doc.get(k) == v for k, v in query.items())
+                if match:
+                    return doc
+            return None
+        
+        def find(self, query=None):
+            if query is None:
+                return list(self.data.values())
+            results = []
+            for doc in self.data.values():
+                match = all(doc.get(k) == v for k, v in query.items())
+                if match:
+                    results.append(doc)
+            return results
+        
+        def delete_one(self, query):
+            for doc_id, doc in list(self.data.items()):
+                match = all(doc.get(k) == v for k, v in query.items())
+                if match:
+                    del self.data[doc_id]
+                    return type('obj', (object,), {'deleted_count': 1})
+            return type('obj', (object,), {'deleted_count': 0})
+        
+        def sort(self, field, direction):
+            return self
+    
+    image_analysis_collection = InMemoryCollection()
 
 # Initialize agents
 query_suggestion_agent = QuerySuggestionAgent()
@@ -141,142 +186,65 @@ def token_required(f):
     return decorated
 
 
+@app.route("/register", methods=["POST"])
+def register():
+    data = request.json
+    username = data.get("username")
+    password = data.get("password")
+    is_admin = data.get("is_admin", False)  # Allow admin to set admin status
 
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        auth_header = request.headers.get('Authorization')
+    if not username or not password:
+        return jsonify({"error": "Username and password are required"}), 400
 
-        if auth_header and auth_header.startswith('Bearer '):
-            token = auth_header.split(" ")[1]
-        else:
-            return jsonify({'message': 'Token is missing!'}), 401
+    existing_user = users_collection.find_one({"username": username})
+    if existing_user:
+        return jsonify({"error": "Username already exists"}), 409
 
+    hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
+
+    user_id = str(uuid.uuid4())
+    users_collection.insert_one({
+        "_id": user_id, 
+        "username": username, 
+        "password": hashed_pw,
+        "is_admin": is_admin
+    })
+
+    return jsonify({"message": "User registered successfully!"}), 201
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.json
+    username = data.get("username")
+    password = data.get("password")
+
+    user = users_collection.find_one({"username": username})
+    if not user or not bcrypt.check_password_hash(user["password"], password):
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    # If user has ObjectId _id, migrate to string _id and use that for token
+    if not isinstance(user['_id'], str):
         try:
-            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-            user_id = data.get('user_id')
-
-            logger.debug(f"[AUTH] Looking up user by string _id: {user_id}")
-            user = users_collection.find_one({'_id': str(user_id)})
-
-            # If not found, and user_id looks like an ObjectId, try ObjectId lookup and migrate
-            if not user:
-                try:
-                    from bson import ObjectId
-                    if ObjectId.is_valid(user_id):
-                        obj_id = ObjectId(user_id)
-                        logger.debug(f"[AUTH] Not found by string. Trying ObjectId: {obj_id}")
-                        user_obj = users_collection.find_one({'_id': obj_id})
-                        if user_obj:
-                            # Copy user data, set _id to string
-                            user_data = dict(user_obj)
-                            user_data['_id'] = str(user_id)
-                            users_collection.insert_one(user_data)
-                            users_collection.delete_one({'_id': obj_id})
-                            user = user_data
-                            logger.debug(f"[AUTH] Migrated user to string _id: {user_id}")
-                except Exception as e:
-                    logger.error(f"[AUTH] ObjectId lookup and migration failed: {e}")
-
-            if not user:
-                logger.warning(f"[AUTH] No user found for ID: {user_id}")
-                
-                all_users = list(users_collection.find({}, {"_id": 1, "username": 1}))
-                logger.warning("[AUTH] All user IDs in DB:")
-                for u in all_users:
-                    logger.warning(f"  _id: {u.get('_id')}, username: {u.get('username')}")
-                # Fallback: try to find by username in token (for debugging)
-                username = data.get('username')
-                if username:
-                    user = users_collection.find_one({'username': username})
-                    if user:
-                        logger.warning(f"[AUTH] Fallback: found user by username: {username}")
-                        return f(user, *args, **kwargs)
-                return jsonify({'message': 'User not found'}), 401
-
-            logger.info(f"[AUTH] ✅ User found: {user.get('username', 'unknown')} (Admin: {user.get('is_admin', False)})")
-
-        except jwt.ExpiredSignatureError:
-            return jsonify({'message': 'Token expired!'}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({'message': 'Invalid token!'}), 401
+            str_id = str(user['_id'])
+            user_data = dict(user)
+            user_data['_id'] = str_id
+            users_collection.insert_one(user_data)
+            users_collection.delete_one({'_id': user['_id']})
+            user = user_data
+            print(f"[LOGIN MIGRATION] Migrated user {username} to string _id: {str_id}")
         except Exception as e:
-            logger.error(f"Unexpected error in token decoding: {e}")
-            return jsonify({'message': 'Token processing error'}), 500
+            print(f"[LOGIN MIGRATION ERROR] {e}")
 
-        return f(user, *args, **kwargs)
+    token = jwt.encode({
+        'user_id': str(user['_id']),
+        'exp': datetime.now(timezone.utc) + timedelta(hours=1)
+    }, SECRET_KEY, algorithm='HS256')
 
-    return decorated
-
-
-
-
-
-# @app.route("/register", methods=["POST"])
-# @token_required
-# def register(current_user):
-#     current_user = cast(dict, current_user)
-#     if not current_user.get("is_admin", False):
-#         return jsonify({"error": "Only administrators can register new users"}), 403
-#     
-#     data = request.json
-#     username = data.get("username")
-#     password = data.get("password")
-#     is_admin = data.get("is_admin", False)  # Allow admin to set admin status
-#
-#     if not username or not password:
-#         return jsonify({"error": "Username and password are required"}), 400
-#
-#     existing_user = users_collection.find_one({"username": username})
-#     if existing_user:
-#         return jsonify({"error": "Username already exists"}), 409
-#
-#     hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
-#
-#     user_id = str(uuid.uuid4())
-#     users_collection.insert_one({
-#         "_id": user_id, 
-#         "username": username, 
-#         "password": hashed_pw,
-#         "is_admin": is_admin
-#     })
-#
-#     return jsonify({"message": "User registered successfully!"}), 201
-
-
-# @app.route("/login", methods=["POST"])
-# def login():
-#     data = request.json
-#     username = data.get("username")
-#     password = data.get("password")
-#
-#     user = users_collection.find_one({"username": username})
-#     if not user or not bcrypt.check_password_hash(user["password"], password):
-#         return jsonify({"error": "Invalid credentials"}), 401
-#
-#     # If user has ObjectId _id, migrate to string _id and use that for token
-#     if not isinstance(user['_id'], str):
-#         try:
-#             str_id = str(user['_id'])
-#             user_data = dict(user)
-#             user_data['_id'] = str_id
-#             users_collection.insert_one(user_data)
-#             users_collection.delete_one({'_id': user['_id']})
-#             user = user_data
-#             print(f"[LOGIN MIGRATION] Migrated user {username} to string _id: {str_id}")
-#         except Exception as e:
-#             print(f"[LOGIN MIGRATION ERROR] {e}")
-#
-#     token = jwt.encode({
-#         'user_id': str(user['_id']),
-#         'exp': datetime.now(timezone.utc) + timedelta(hours=1)
-#     }, SECRET_KEY, algorithm='HS256')
-#
-#     return jsonify({
-#         "token": token,
-#         "is_admin": user.get("is_admin", False) if user else False
-#     })
+    return jsonify({
+        "token": token,
+        "is_admin": user.get("is_admin", False) if user else False
+    })
 
 
 @app.route("/chat/stream", methods=["POST"])
@@ -377,26 +345,26 @@ def chat(current_user):
         # Calculate response time and log analytics event
         response_time = time.time() - start_time
         
-        # Log analytics event
-        try:
-            from analytics.service import AnalyticsService
-            AnalyticsService.log_event(
-                event_type='chat',
-                agent_type='document',
-                user_id=str(current_user["_id"]),
-                session_id=chat_id,
-                response_time=response_time,
-                status='success',
-                metadata={
-                    'query_length': len(query),
-                    'response_length': len(final_answer),
-                    'chunks_retrieved': len(chunks),
-                    'chunks_used': len(used_chunks),
-                    'is_followup': is_followup
-                }
-            )
-        except Exception as analytics_error:
-            print(f"Failed to log analytics: {analytics_error}")
+        # Log analytics event (commented out due to missing analytics service)
+        # try:
+        #     from analytics.service import AnalyticsService
+        #     AnalyticsService.log_event(
+        #         event_type='chat',
+        #         agent_type='document',
+        #         user_id=str(current_user["_id"]),
+        #         session_id=chat_id,
+        #         response_time=response_time,
+        #         status='success',
+        #         metadata={
+        #             'query_length': len(query),
+        #             'response_length': len(final_answer),
+        #             'chunks_retrieved': len(chunks),
+        #             'chunks_used': len(used_chunks),
+        #             'is_followup': is_followup
+        #         }
+        #     )
+        # except Exception as analytics_error:
+        #     print(f"Failed to log analytics: {analytics_error}")
 
         def format_pdf_url(src):
             # Remove .pdf if present, then add .pdf once
@@ -437,21 +405,21 @@ def chat(current_user):
         })
         
     except Exception as e:
-        # Log error analytics event
+        # Log error analytics event (commented out due to missing analytics service)
         response_time = time.time() - start_time
-        try:
-            from analytics.service import AnalyticsService
-            AnalyticsService.log_event(
-                event_type='chat',
-                agent_type='document',
-                user_id=str(current_user["_id"]),
-                session_id=chat_id,
-                response_time=response_time,
-                status='error',
-                error_message=str(e)
-            )
-        except:
-            pass
+        # try:
+        #     from analytics.service import AnalyticsService
+        #     AnalyticsService.log_event(
+        #         event_type='chat',
+        #         agent_type='document',
+        #         user_id=str(current_user["_id"]),
+        #         session_id=chat_id,
+        #         response_time=response_time,
+        #         status='error',
+        #         error_message=str(e)
+        #     )
+        # except:
+        #     pass
         
         return jsonify({"error": f"Error processing chat: {str(e)}"}), 500
 
