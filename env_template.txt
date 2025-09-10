@@ -1,0 +1,39 @@
+# Flask Configuration
+FLASK_ENV=development
+FLASK_DEBUG=True
+FLASK_SECRET_KEY=your-super-secret-key-change-this-in-production
+
+# Database Configuration
+MONGODB_URI=mongodb://localhost:27017/rag_system
+MONGODB_DB=rag_system
+
+# JWT Configuration
+JWT_SECRET_KEY=your-jwt-secret-key-change-this-in-production
+
+# OpenAI Configuration
+OPENAI_API_KEY=your-openai-api-key-here
+OPENAI_MODEL=gpt-4o-mini
+
+# Qdrant Configuration
+QDRANT_HOST=localhost
+QDRANT_PORT=6333
+QDRANT_COLLECTION_NAME=documents
+
+# File Upload Configuration
+UPLOAD_FOLDER=uploads
+MAX_CONTENT_LENGTH=16777216
+
+# CORS Configuration (comma-separated for multiple origins)
+CORS_ORIGINS=http://localhost:3000,http://localhost:5173,https://yourdomain.com
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=5000
+
+# Logging Configuration
+LOG_LEVEL=INFO
+
+# Feature Flags
+ENABLE_IMAGE_ANALYSIS=True
+ENABLE_VOICE_INPUT=True
+ENABLE_ADMIN_PANEL=True 

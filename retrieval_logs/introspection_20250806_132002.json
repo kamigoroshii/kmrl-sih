@@ -1,0 +1,12 @@
+[
+  {
+    "timestamp": "2025-08-06T13:20:02.679785",
+    "query": "What actions should operators take when they experience impaired visibility? in tata or reliance",
+    "embedding_norm": 1.0000000352043796,
+    "retrieved_docs": 3,
+    "top_snippet": "10\n31200243\nSafety Section\nDo Not Operate (1)\nThis safety message is positioned on the panel at the \nright side of the operator station.\ng00931194\nDo not operate or work on this equipment unless you\nhave read and understand the instructions and\nwarnings in the Operation and Maintenance Manual.\nFailure to follow the instructions or heed the warnings\ncould result in injury or death. Contact any Caterpillar\ndealer for replacement manuals. Proper care is your\nresponsibility.\nDo Not Stand Under the Load (2)\nThis message is positioned on the side of the boom \nhead on both sides of the machine\ng00930659\nA crushing hazard exists when the boom is lowered or\nfrom a falling load. Stay clear of the boom when the\nmachine is in operation. Failure to stay clear of the\nboom can cause injury or death.\n{Image_1 Cat TH360B Telehandler Operator and Maintanence Manual\\page_12_img_1.png description: The image is a warning label with a bold \"WARNING\" text at the top, accompanied by an exclamation mark inside a triangle. Below, it advises not to operate or work on the equipment without reading and understanding the operation and maintenance manuals. It warns of potential injury or death if instructions are not followed. It suggests contacting a Caterpillar dealer for replacement manuals. The label includes icons of a warning triangle and an open book, with the number \"225-3305 1\" at the bottom right.}\n{Image_2 Cat TH360B Telehandler Operator and Maintanence Manual\\page_12_img_2.png description: The image is a black rectangular warning label with a white exclamation mark inside a triangle, followed by the word \"WARNING\" in bold white letters.}\n{Image_3 Cat TH360B Telehandler Operator and Maintanence Manual\\page_12_img_3.png description: The image is a warning sign. The top section features a triangular caution symbol with a person being struck by a falling object. Below, there is a diagram showing a rectangle and a person with arrows indicating distance or separation. The sign includes the text \"WARNING\" at the top.}",
+    "keyword_match_count": 3,
+    "retrieval_strategy": "keyword",
+    "retrieval_success": true
+  }
+]

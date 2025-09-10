@@ -1,0 +1,12 @@
+[
+  {
+    "timestamp": "2025-08-04T12:58:04.166085",
+    "query": "What specific procedures must be followed to prevent back feed of electricity to shore power?",
+    "embedding_norm": 0.9999999856526725,
+    "retrieved_docs": 3,
+    "top_snippet": "4. Operation\n5-2016\n28\nA043D713 (Issue 5)\nCopyright \u00a9 2016 Cummins Inc.\n4.7\nConnecting to Shore Power\nWARNING\nInterconnecting the generator set and shore power can lead to electrocution of utility line\nworkers, equipment damage, and fire. Use an approved switching device to prevent\ninterconnections.\nA vehicle with provisions for connecting to utility power must have an approved device to keep the\ngenerator set and utility from being interconnected.\nNo.\nDescription\nNo.\nDescription\n1\nGenerator Set\n4\nTo Vehicle AC Distribution Panel\n2\nTransfer Switch\n5\nGenerator\n3\n50 Amp Shore Power\nFIGURE 6.\nTYPICAL CONNECTIONS WITH TRANSFER SWITCH AND UTILITY\n4.8\nOperating in Weather Extremes\nPay particular attention to the following items when operating the generator set in cold or hot weather.\n1. Make sure nothing blocks airflow to and from the generator set.\n2. Make sure engine oil viscosity is appropriate for the ambient temperature. See Section 5.5 on page\n34 for engine oil recommendations.\n3. Keep the generator set clean.\n4. Perform maintenance due. See Section 5.1 on page 31.\n{Image_1 A043D713\\page_34_img_1.png description: This image is a schematic diagram of an electrical circuit. It includes:\n\n1. A transformer with terminals labeled T1, T2, T3, and T4.\n2. Circuit breakers labeled CB1 and CB2.\n3. A terminal block labeled TB2 with numbered connections (1 to 4).\n4. Voltage levels indicated as 240V and 120V.\n5. Lines labeled L1, L2, N (neutral), and GND (ground).\n6. Sections of the diagram are enclosed in dashed lines and numbered 1 to 5.\n7. Ground symbols are}\n{Image_2 A043D713\\page_34_img_2.png description: The image is a yellow triangle with a black border, featuring a black exclamation mark in the center. It is a standard warning symbol.}",
+    "keyword_match_count": 0,
+    "retrieval_strategy": "semantic",
+    "retrieval_success": false
+  }
+]

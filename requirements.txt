@@ -1,0 +1,28 @@
+streamlit
+transformers
+torch
+sentence-transformers
+qdrant-client
+
+pytesseract
+python-docx
+python-pptx
+pillow
+openpyxl
+PyMuPDF
+flask
+flasgger
+pymongo
+flask-cors
+opencv-python
+flask_bcrypt
+jwt
+easyocr
+
+# Ollama for local LLM
+ollama
+
+# New dependencies for Qwen (Colpali removed as it's not available in PyPI)
+huggingface-hub
+accelerate
+safetensors
