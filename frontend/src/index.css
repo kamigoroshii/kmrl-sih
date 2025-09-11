@@ -1,0 +1,262 @@
+/* Fallback for Box Icons visibility */
+.bx {
+  font-family: 'boxicons' !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  display: inline-block !important;
+  text-rendering: auto !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  color: inherit !important;
+  font-style: normal;
+  font-weight: normal;
+  speak: never;
+  display: inline-block;
+  text-decoration: inherit;
+  text-align: center;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  vertical-align: middle;
+}
+@import url('https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+:root {
+  /* Custom palette from user image */
+  --custom-beige: #E7DCC9;
+  --custom-olive-brown: #8C7C63;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  
+  color-scheme: light;
+  color: rgba(55, 65, 81, 1);
+  background-color: rgba(249, 250, 251, 1);
+  
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  
+  /* Olive color palette */
+  --olive-50: #f9faf7;
+  --olive-100: #f2f4ed;
+  --olive-200: #e1e7d3;
+  --olive-300: #c7d4ab;
+  --olive-400: #a8bd7b;
+  --olive-500: #8ba355;
+  --olive-600: #6b8041;
+  --olive-700: #546435;
+  --olive-800: #45522d;
+  --olive-900: #3a4628;
+  
+  /* Beige color palette */
+  --beige-50: #fdfcf9;
+  --beige-100: #faf8f1;
+  --beige-200: #f4f0e1;
+  --beige-300: #ebe4cc;
+  --beige-400: #ddd4aa;
+  --beige-500: #cdc088;
+  --beige-600: #b8a470;
+  --beige-700: #9a875c;
+  --beige-800: #7f704e;
+  --beige-900: #695c42;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, var(--olive-50) 0%, var(--beige-50) 100%);
+}
+
+#root {
+  width: 100%;
+  margin: 0 auto;
+  text-align: left;
+  min-height: 100vh;
+}
+
+/* Olive color utilities */
+.bg-olive {
+  background-color: var(--olive-500) !important;
+}
+
+.bg-olive-50 {
+  background-color: var(--olive-50) !important;
+}
+
+.bg-olive-100 {
+  background-color: var(--olive-100) !important;
+}
+
+.bg-olive-200 {
+  background-color: var(--olive-200) !important;
+}
+
+.bg-olive-300 {
+  background-color: var(--olive-300) !important;
+}
+
+.bg-olive-400 {
+  background-color: var(--olive-400) !important;
+}
+
+.bg-olive-500 {
+  background-color: var(--olive-500) !important;
+}
+
+.bg-olive-600 {
+  background-color: var(--olive-600) !important;
+}
+
+.bg-olive-700 {
+  background-color: var(--olive-700) !important;
+}
+
+.bg-olive-800 {
+  background-color: var(--olive-800) !important;
+}
+
+.bg-olive-900 {
+  background-color: var(--olive-900) !important;
+}
+
+.text-olive {
+  color: var(--olive-500) !important;
+}
+
+.text-olive-600 {
+  color: var(--olive-600) !important;
+}
+
+.text-olive-700 {
+  color: var(--olive-700) !important;
+}
+
+.text-olive-800 {
+  color: var(--olive-800) !important;
+}
+
+.hover\:bg-olive-600:hover {
+  background-color: var(--olive-600) !important;
+}
+
+.hover\:bg-olive-700:hover {
+  background-color: var(--olive-700) !important;
+}
+
+/* Beige color utilities */
+.bg-beige {
+  background-color: var(--beige-500) !important;
+}
+
+.bg-beige-50 {
+  background-color: var(--beige-50) !important;
+}
+
+.bg-beige-100 {
+  background-color: var(--beige-100) !important;
+}
+
+.text-beige {
+  color: var(--beige-500) !important;
+}
+
+/* Fallback styles if Tailwind doesn't load */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.bg-gradient-to-br {
+  background: linear-gradient(135deg, var(--olive-50) 0%, var(--beige-50) 100%);
+}
+
+.from-olive-50 {
+  --tw-gradient-from: var(--olive-50);
+}
+
+.to-beige-50 {
+  --tw-gradient-to: var(--beige-50);
+}
+
+/* Override common colors with olive theme */
+.bg-primary {
+  background-color: var(--olive-500) !important;
+}
+
+.text-primary {
+  color: var(--olive-500) !important;
+}
+
+.border-primary {
+  border-color: var(--olive-500) !important;
+}
+
+/* Brown to olive conversion */
+.bg-brown {
+  background-color: var(--olive-600) !important;
+}
+
+.text-brown {
+  color: var(--olive-600) !important;
+}
+
+/* Department colors using olive palette */
+.bg-blue-500 {
+  background-color: var(--olive-500) !important;
+}
+
+.bg-green-500 {
+  background-color: var(--olive-600) !important;
+}
+
+.bg-yellow-500 {
+  background-color: var(--olive-400) !important;
+}
+
+.bg-purple-500 {
+  background-color: var(--olive-700) !important;
+}
+
+/* Button styles */
+.btn-primary {
+  background-color: var(--olive-500) !important;
+  color: white !important;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: var(--olive-600) !important;
+}
+
+/* Card styles */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+/* Navigation styles */
+.nav-link {
+  color: var(--olive-700) !important;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--olive-500) !important;
+}
