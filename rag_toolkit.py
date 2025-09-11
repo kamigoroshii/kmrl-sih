@@ -38,7 +38,7 @@ def single_query_pipeline(query, top_k=5, recursion_depth=0, tried_with_filename
     try:
         clip_query_emb = embed_text_clip(query)
         # Search CLIP collection with 1536-dim vectors (same as OCR)
-        clip_results = retriever.search_single_collection(clip_query_emb, top_k=top_k, filters=None, collection_name="Agentic_RAGv2_CLIP")
+        clip_results = retriever.search_single_collection(clip_query_emb, top_k=top_k, filters=None, collection_name="New_Collection_CLIP")
         clip_confident_chunks = [(chunk, src) for chunk, src, score, vector_type in clip_results if score >= CLIP_CONFIDENCE_THRESHOLD]
         clip_retrieval_scores = [score for _, _, score, _ in clip_results]
         

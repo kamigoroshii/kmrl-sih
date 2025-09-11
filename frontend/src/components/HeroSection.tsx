@@ -1,19 +1,25 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
+import RecentActivityFeed from './Recentactivityfeed'
 
-const HeroSection: React.FC = () => {
-  const [currentTestimonial, setCurrentTestimonial] = useState(0)
+interface HeroSectionProps {
+  onDepartmentLogin?: (departmentId: string) => void;
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({ onDepartmentLogin }) => {
+
 
 
   // Enhanced department overview with detailed descriptions
   const departmentOverview = [
     {
       id: 'operations',
-      name: 'Operations',
+      name: 'Maintenance & Operations',
       icon: (
         <i className="bx bx-cog text-3xl text-olive-700"></i>
       ),
-      description: 'Manages operational workflows and ensures seamless document processing across all metro systems.'
+      description: 'Manages operational workflows and ensures seamless document processing across all metro systems.',
+      url: 'https://kochimetro.org/operations/'
     },
     {
       id: 'finance',
@@ -21,7 +27,17 @@ const HeroSection: React.FC = () => {
       icon: (
         <i className="bx bx-dollar text-3xl text-olive-700"></i>
       ),
-      description: 'Handles budget approvals, financial documents, and maintains fiscal transparency in all transactions.'
+      description: 'Handles budget approvals, financial documents, and maintains fiscal transparency in all transactions.',
+      url: 'https://kochimetro.org/finance/'
+    },
+    {
+      id: 'procurement',
+      name: 'Procurement',
+      icon: (
+        <i className="bx bx-package text-3xl text-olive-700"></i>
+      ),
+      description: 'Oversees purchasing, vendor management, and ensures timely procurement of goods and services.',
+      url: 'https://kochimetro.org/procurement/'
     },
     {
       id: 'hr',
@@ -29,7 +45,8 @@ const HeroSection: React.FC = () => {
       icon: (
         <i className="bx bx-group text-3xl text-olive-700"></i>
       ),
-      description: 'Oversees employee documentation, training records, and personnel management workflows.'
+      description: 'Oversees employee documentation, training records, and personnel management workflows.',
+      url: 'https://kochimetro.org/hr/'
     },
     {
       id: 'engineering',
@@ -37,7 +54,8 @@ const HeroSection: React.FC = () => {
       icon: (
         <i className="bx bx-wrench text-3xl text-olive-700"></i>
       ),
-      description: 'Manages technical specifications, safety protocols, and infrastructure documentation.'
+      description: 'Manages technical specifications, safety protocols, and infrastructure documentation.',
+      url: 'https://kochimetro.org/engineering/'
     }
   ]
 
@@ -78,103 +96,101 @@ const HeroSection: React.FC = () => {
   ]
 
   // Testimonials data
-  const testimonials = [
-    {
-      quote: "The KMRL Document Management System has revolutionized how we handle project specifications. What used to take days now takes hours.",
-      name: "Rajesh Kumar",
-      role: "Senior Engineering Manager",
-      department: "Engineering"
-    },
-    {
-      quote: "Financial document processing is now seamless and transparent. The approval workflows have reduced processing time by 60%.",
-      name: "Priya Menon",
-      role: "Finance Director",
-      department: "Finance"
-    },
-    {
-      quote: "Managing employee records and training documentation has never been easier. The system keeps everything organized and accessible.",
-      name: "Suresh Nair",
-      role: "HR Operations Lead",
-      department: "Human Resources"
-    }
-  ]
+
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-olive-100 via-olive-50 to-white py-20 relative overflow-hidden">
+      <section className="min-h-screen relative overflow-hidden flex items-center">
+        {/* Metro Background Image */}
+        <img src="/metrobgtrain.jpg" alt="Kochi Metro Train Background" className="absolute inset-0 w-full h-full object-cover object-center z-0" style={{pointerEvents: 'none'}} />
+        {/* Overlay for text readability */}
+        <div className="absolute inset-0 bg-black bg-opacity-40 z-0 pointer-events-none"></div>
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-20 left-10 w-32 h-32 bg-olive-300 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-40 h-40 bg-olive-400 rounded-full blur-3xl"></div>
           <div className="absolute top-40 right-20 w-20 h-20 bg-olive-200 rounded-full blur-2xl"></div>
         </div>
-        
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
-            <div className="mb-6">
-             
-            </div>
-            
-            <h1 className="text-6xl font-bold mb-6">
-              <span className="text-gray-900">Welcome to </span>
-              <span className="text-olive-600 bg-gradient-to-r from-olive-600 to-olive-700 bg-clip-text text-transparent">KMRL</span>
+            <div className="mb-6"></div>
+            <h1 className="text-6xl font-bold mb-6 text-white">
+              <span className="">Welcome to </span>
+              <span className="text-white">KMRL</span>
             </h1>
-            
-            <h2 className="text-4xl font-semibold text-olive-700 mb-8">
+            <h2 className="text-4xl font-semibold text-white mb-8">
               Document Workflow Management System
             </h2>
-            
-            <p className="text-xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl text-white mb-12 max-w-4xl mx-auto leading-relaxed">
               Streamline your document processes with our comprehensive workflow management 
               solution designed specifically for Kochi Metro Rail Limited. Experience efficiency, 
               security, and transparency in every workflow.
             </p>
-            
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link
-                to="/login"
-                className="bg-gradient-to-r from-olive-600 to-olive-700 hover:from-olive-700 hover:to-olive-800 text-white px-10 py-4 rounded-xl font-semibold text-lg transition-all duration-300 inline-flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              <button
+                onClick={() => onDepartmentLogin && onDepartmentLogin('')}
+                className="bg-gradient-to-r from-olive-600 to-olive-700 text-white px-10 py-4 rounded-xl font-semibold text-lg transition-all duration-300 inline-flex items-center justify-center shadow-lg focus:outline-none focus:ring-4 focus:ring-olive-400 hover:from-olive-700 hover:to-olive-800 hover:scale-105 hover:shadow-2xl active:scale-95 active:bg-olive-800"
               >
-                Get Started
-                <i className="bx bx-right-arrow-alt ml-2 text-xl"></i>
-              </Link>
-              
-              <button className="border-2 border-olive-600 text-olive-700 hover:bg-olive-600 hover:text-white px-10 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                <i className="bx bx-play-circle mr-2"></i>
-                Learn More
+                <span>Explore Dashboard</span>
+                <i className="bx bx-right-arrow-alt text-xl ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
               </button>
+              <a
+                href="https://kochimetro.org/about-us/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-2 border-olive-600 bg-transparent text-white px-10 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg focus:outline-none focus:ring-4 focus:ring-olive-400 hover:bg-olive-600 hover:text-olive-50 hover:scale-105 hover:shadow-2xl active:scale-95 active:bg-olive-700 learn-more-btn inline-flex items-center justify-center"
+              >
+                <i className="bx bx-play-circle mr-2 transition-transform duration-300 group-hover:scale-110"></i>
+                <span>Learn More</span>
+              </a>
+              <style>{`
+                .learn-more-btn, .learn-more-btn:hover, .learn-more-btn:focus {
+                  color: #fff !important;
+                }
+                .learn-more-btn .bx {
+                  color: #fff !important;
+                }
+              `}</style>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Department Overview Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-olive-50">
+  {/* Department Overview Section */}
+  <section className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-white to-olive-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 bg-olive-100 text-olive-700 rounded-full text-sm font-medium mb-4">
-              <i className="bx bx-buildings mr-2"></i>
-              Our Departments
-            </div>
+            {/* Removed 'Our Departments' label as requested */}
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
               Department Overview
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Four key departments working together to ensure efficient document management 
+              Five key departments working together to ensure efficient document management 
               and seamless workflow coordination across KMRL.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             {departmentOverview.map((dept, index) => (
-              <div key={index} className="group">
-                <div className="bg-white rounded-2xl shadow-lg p-8 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-olive-100 hover:border-olive-300">
-                  <div className="w-20 h-20 bg-gradient-to-br from-olive-500 to-olive-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <div key={index} className="group" tabIndex={0} role="region" aria-label={`Login to ${dept.name}`}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { onDepartmentLogin && onDepartmentLogin(dept.id); } }}>
+                <div
+                  className="block rounded-2xl shadow-lg p-8 text-center transition-all duration-500 border border-olive-300 focus:ring-4 focus:ring-olive-400 group-hover:shadow-2xl group-hover:-translate-y-2 group-hover:border-olive-600 group-active:scale-95 group-active:bg-olive-100 bg-gradient-to-br from-olive-50 to-olive-200 group-hover:from-olive-200 group-hover:to-olive-400"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <div className="w-20 h-20 bg-gradient-to-br from-olive-600 to-olive-700 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 transition-transform duration-300 shadow-lg group-hover:scale-110 group-hover:bg-olive-800 group-active:scale-95">
                     {dept.icon}
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-olive-700 transition-colors duration-300">{dept.name}</h3>
-                  <p className="text-gray-600 leading-relaxed">{dept.description}</p>
+                  <h3 className="text-xl font-bold text-olive-800 mb-4 transition-colors duration-300 group-hover:text-olive-900 group-active:text-olive-900">{dept.name}</h3>
+                  <p className="text-olive-700 leading-relaxed group-hover:text-olive-900 group-active:text-olive-900 mb-6">{dept.description}</p>
+                  <button
+                    onClick={() => onDepartmentLogin && onDepartmentLogin(dept.id)}
+                    className="mt-2 bg-gradient-to-r from-olive-600 to-olive-700 text-white px-6 py-2 rounded-lg font-semibold text-base transition-all duration-300 shadow focus:outline-none focus:ring-2 focus:ring-olive-400 hover:from-olive-700 hover:to-olive-800 hover:scale-105 hover:shadow-xl active:scale-95 active:bg-olive-800"
+                    aria-label={`Login to ${dept.name}`}
+                  >
+                    Login
+                  </button>
                 </div>
               </div>
             ))}
@@ -182,74 +198,11 @@ const HeroSection: React.FC = () => {
         </div>
       </section>
 
-      {/* Platform Description Section */}
-      <section className="py-20 bg-gradient-to-r from-olive-600 to-olive-700 text-white relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-20 w-64 h-64 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-20 w-48 h-48 bg-olive-300 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 bg-olive-800 bg-opacity-50 text-olive-100 rounded-full text-sm font-medium mb-6">
-              <i className="bx bx-rocket mr-2"></i>
-              Platform Description
-            </div>
-            <h2 className="text-4xl font-bold mb-6">
-              Transforming Document Management
-            </h2>
-            <h3 className="text-2xl font-light text-olive-100 mb-8">
-              for Modern Transportation
-            </h3>
-          </div>
-          
-          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-3xl p-12 border border-olive-500">
-            <div className="max-w-4xl mx-auto text-center">
-              <p className="text-xl text-olive-50 leading-relaxed mb-12">
-                Our comprehensive platform revolutionizes how Kochi Metro Rail Limited manages, processes, and secures critical documents. 
-                By implementing intelligent workflow automation and centralized data management, we eliminate administrative bottlenecks 
-                while ensuring complete transparency and accountability.
-              </p>
-              
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="text-center group">
-                  <div className="w-20 h-20 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 group-hover:bg-opacity-30 transition-all duration-300">
-                    <i className="bx bx-trending-up text-3xl"></i>
-                  </div>
-                  <h4 className="font-bold text-white text-lg mb-3">Streamlined Processes</h4>
-                  <p className="text-olive-100 text-sm leading-relaxed">Reduce processing time by up to 70% with automated workflows</p>
-                </div>
-                
-                <div className="text-center group">
-                  <div className="w-20 h-20 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 group-hover:bg-opacity-30 transition-all duration-300">
-                    <i className="bx bx-check-double text-3xl"></i>
-                  </div>
-                  <h4 className="font-bold text-white text-lg mb-3">Reduced Administrative Burden</h4>
-                  <p className="text-olive-100 text-sm leading-relaxed">Eliminate manual paperwork and repetitive tasks</p>
-                </div>
-                
-                <div className="text-center group">
-                  <div className="w-20 h-20 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 group-hover:bg-opacity-30 transition-all duration-300">
-                    <i className="bx bx-shield-check text-3xl"></i>
-                  </div>
-                  <h4 className="font-bold text-white text-lg mb-3">Secure Centralized Data</h4>
-                  <p className="text-olive-100 text-sm leading-relaxed">Enterprise-grade security with role-based access controls</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Document Flow Section */}
-      <section className="py-20 bg-gradient-to-b from-olive-50 to-white">
+  <section className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-olive-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 bg-olive-100 text-olive-700 rounded-full text-sm font-medium mb-4">
-              <i className="bx bx-git-branch mr-2"></i>
-              Workflow Process
-            </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
               Document Flow
             </h2>
@@ -260,174 +213,132 @@ const HeroSection: React.FC = () => {
           </div>
 
           <div className="relative">
-            <div className="flex flex-col lg:flex-row justify-between items-center space-y-8 lg:space-y-0 lg:space-x-4">
+            <div className="flex flex-col lg:flex-row justify-between items-center space-y-12 lg:space-y-0 lg:space-x-0">
               {documentFlow.map((step, index) => (
-                <div key={index} className="flex flex-col items-center relative group">
-                  {/* Step Circle */}
-                  <div className="w-24 h-24 bg-gradient-to-br from-olive-500 to-olive-600 rounded-2xl flex items-center justify-center text-white shadow-xl mb-6 relative z-10 group-hover:scale-110 transition-all duration-300">
-                    {step.icon}
+                <div key={index} className="flex flex-col items-center relative group w-full lg:w-auto">
+                  {/* Step Circle with pulse and shadow */}
+                  <div className="w-24 h-24 bg-gradient-to-br from-olive-500 to-olive-600 rounded-full flex items-center justify-center text-white shadow-2xl mb-6 relative z-10 transition-transform duration-300 animate-fade-in group-hover:scale-110 group-hover:bg-olive-700 group-active:scale-95">
+                    <span className="absolute w-32 h-32 rounded-full bg-olive-200 opacity-20 animate-ping group-hover:bg-olive-400"></span>
+                    <span className="relative z-10">{step.icon}</span>
                   </div>
-                  
+                  {/* Step Number with highlight */}
+                  <div className="w-12 h-12 bg-white border-4 border-olive-500 rounded-full flex items-center justify-center text-olive-700 text-xl font-extrabold mx-auto mb-4 shadow-xl animate-fade-in transition-colors duration-300 group-hover:border-olive-700 group-active:border-olive-900">
+                    {step.step}
+                  </div>
                   {/* Step Content */}
                   <div className="text-center max-w-xs">
-                    <div className="w-10 h-10 bg-olive-600 rounded-xl flex items-center justify-center text-white text-sm font-bold mx-auto mb-4 shadow-lg">
-                      {step.step}
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-olive-700 transition-colors duration-300">{step.title}</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">{step.description}</p>
+                    <h3 className="text-2xl font-bold text-olive-700 mb-2 transition-colors duration-300 group-hover:text-olive-900 group-active:text-olive-900 animate-fade-in">{step.title}</h3>
+                    <p className="text-gray-600 text-base leading-relaxed transition-colors duration-300 group-hover:text-olive-800 group-active:text-olive-900 animate-fade-in-slow">{step.description}</p>
                   </div>
-                  
-                  {/* Arrow connector (hidden on last item) */}
+                  {/* Animated Arrow connector (hidden on last item) */}
                   {index < documentFlow.length - 1 && (
-                    <div className="hidden lg:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-olive-300 to-olive-400 transform translate-x-2 z-0">
-                      <div className="absolute right-0 top-0 transform -translate-y-1/2">
-                        <div className="w-3 h-3 bg-olive-400 rounded-full"></div>
+                    <div className="hidden lg:block absolute top-1/2 right-0 left-full w-32 h-0.5 bg-gradient-to-r from-olive-300 to-olive-500 z-0 animate-grow-x group-hover:bg-olive-500 group-active:bg-olive-700">
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2">
+                        <svg width="32" height="16" viewBox="0 0 32 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M0 8 H28 M28 8 L24 4 M28 8 L24 12" stroke="#7C8B3D" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
                       </div>
                     </div>
                   )}
                 </div>
               ))}
             </div>
+            {/* Animations */}
+            <style>{`
+              @keyframes fade-in {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: none; }
+              }
+              @keyframes fade-in-slow {
+                from { opacity: 0; transform: translateY(40px); }
+                to { opacity: 1; transform: none; }
+              }
+              @keyframes grow-x {
+                from { width: 0; }
+                to { width: 8rem; }
+              }
+              .animate-fade-in { animation: fade-in 0.7s cubic-bezier(.4,0,.2,1) both; }
+              .animate-fade-in-slow { animation: fade-in-slow 1.2s cubic-bezier(.4,0,.2,1) both; }
+              .animate-grow-x { animation: grow-x 1s cubic-bezier(.4,0,.2,1) both; }
+            `}</style>
           </div>
         </div>
       </section>
+
+
+      {/* Recent Activity Feed Section (formerly Department Document Overview) */}
+  <section className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-olive-50">
+    {/* Cool Background Pattern */}
+    <div className="absolute inset-0 pointer-events-none z-0">
+      <div className="absolute top-10 left-10 w-96 h-96 bg-olive-300 opacity-30 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 right-0 w-[32rem] h-[32rem] bg-olive-500 opacity-20 rounded-full blur-3xl"></div>
+      <div className="absolute top-1/2 left-1/2 w-1/2 h-1/2 bg-white opacity-10 rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2"></div>
+    </div>
+    <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center">
+      {/* Centered Section Title */}
+  <h2 className="text-4xl font-bold text-gray-900 text-center mb-4">Recent Activity Feed</h2>
+      {/* Prominent Feed Box */}
+  <div className="w-full rounded-3xl p-10 relative">
+        <RecentActivityFeed />
+      </div>
+    </div>
+  </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-white">
+  <section className="min-h-[80vh] py-20 md:py-28 bg-white flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              What Our Team Says
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Hear from KMRL professionals who experience the benefits of our document management system daily.
-            </p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Employee Testimonies</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">Real feedback from KMRL employees about their experience with our platform.</p>
           </div>
-
-          <div className="relative">
-            <div className="overflow-hidden rounded-xl">
-              <div 
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${currentTestimonial * 100}%)` }}
-              >
-                {testimonials.map((testimonial, index) => (
-                  <div key={index} className="w-full flex-shrink-0 px-4">
-                    <div className="bg-gradient-to-br from-olive-50 to-beige-50 rounded-xl p-8 mx-auto max-w-4xl">
-                      <div className="text-center">
-                        <i className="bx bxs-quote-alt-left text-5xl text-olive mx-auto mb-6"></i>
-                        <blockquote className="text-xl text-gray-700 mb-6 italic">
-                          "{testimonial.quote}"
-                        </blockquote>
-                        <div className="flex items-center justify-center space-x-4">
-                          <div className="w-16 h-16 bg-olive rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                            {testimonial.name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div className="text-left">
-                            <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                            <div className="text-gray-600">{testimonial.role}</div>
-                            <div className="text-olive text-sm">{testimonial.department}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Card 1 */}
+            <div className="bg-white bg-opacity-90 rounded-2xl p-8 flex flex-col items-center shadow-lg border border-olive-200 hover:-translate-y-2 transition-transform duration-300">
+              <blockquote className="text-lg text-olive-900 mb-6">
+                <span className="font-bold text-olive-700 text-xl block mb-2">“The best platform for document management”</span>
+                The new system has made our daily work so much easier. Everything is organized, and approvals are faster than ever. Highly recommended!
+              </blockquote>
+              <div className="flex items-center mt-auto">
+                <img src="/KMRL-logo.png" alt="Employee" className="w-14 h-14 rounded-full border-2 border-olive-400 mr-4 object-cover bg-white" />
+                <div>
+                  <div className="font-bold text-olive-700 text-lg">Anjali Menon</div>
+                  <div className="text-olive-600 text-sm">Engineering, KMRL</div>
+                </div>
               </div>
             </div>
-            
-            {/* Navigation Buttons */}
-            <div className="flex justify-center space-x-4 mt-8">
-              <button
-                onClick={() => setCurrentTestimonial(currentTestimonial > 0 ? currentTestimonial - 1 : testimonials.length - 1)}
-                className="w-12 h-12 bg-olive hover:bg-olive-600 text-white rounded-full flex items-center justify-center transition-colors shadow-lg"
-              >
-                <i className="bx bx-chevron-left text-xl"></i>
-              </button>
-              <button
-                onClick={() => setCurrentTestimonial(currentTestimonial < testimonials.length - 1 ? currentTestimonial + 1 : 0)}
-                className="w-12 h-12 bg-olive hover:bg-olive-600 text-white rounded-full flex items-center justify-center transition-colors shadow-lg"
-              >
-                <i className="bx bx-chevron-right text-xl"></i>
-              </button>
+            {/* Card 2 */}
+            <div className="bg-white bg-opacity-90 rounded-2xl p-8 flex flex-col items-center shadow-lg border border-olive-200 hover:-translate-y-2 transition-transform duration-300">
+              <blockquote className="text-lg text-olive-900 mb-6">
+                <span className="font-bold text-olive-700 text-xl block mb-2">“Efficient and user-friendly”</span>
+                I can track every document and workflow with ease. The interface is clean, and the chatbot is a real time-saver for our team.
+              </blockquote>
+              <div className="flex items-center mt-auto">
+                <img src="/KMRL-logo.png" alt="Employee" className="w-14 h-14 rounded-full border-2 border-olive-400 mr-4 object-cover bg-white" />
+                <div>
+                  <div className="font-bold text-olive-700 text-lg">Ravi Kumar</div>
+                  <div className="text-olive-600 text-sm">Finance, KMRL</div>
+                </div>
+              </div>
             </div>
-            
-            {/* Testimonial indicators */}
-            <div className="flex justify-center space-x-2 mt-6">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentTestimonial(index)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    index === currentTestimonial ? 'bg-olive' : 'bg-gray-300'
-                  }`}
-                />
-              ))}
+            {/* Card 3 */}
+            <div className="bg-white bg-opacity-90 rounded-2xl p-8 flex flex-col items-center shadow-lg border border-olive-200 hover:-translate-y-2 transition-transform duration-300">
+              <blockquote className="text-lg text-olive-900 mb-6">
+                <span className="font-bold text-olive-700 text-xl block mb-2">“A game changer for HR”</span>
+                Managing employee records and approvals is now seamless. The platform is secure, and support is always available when needed.
+              </blockquote>
+              <div className="flex items-center mt-auto">
+                <img src="/KMRL-logo.png" alt="Employee" className="w-14 h-14 rounded-full border-2 border-olive-400 mr-4 object-cover bg-white" />
+                <div>
+                  <div className="font-bold text-olive-700 text-lg">Meera Suresh</div>
+                  <div className="text-olive-600 text-sm">Human Resources, KMRL</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
 
-      {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-olive-600 via-olive-700 to-olive-800 text-white relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full">
-            <div className="absolute top-20 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
-            <div className="absolute bottom-20 right-10 w-40 h-40 bg-olive-300 rounded-full blur-3xl"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-olive-400 rounded-full blur-3xl"></div>
-          </div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center px-4 py-2 bg-olive-800 bg-opacity-50 text-olive-100 rounded-full text-sm font-medium mb-4">
-              <i className="bx bx-trending-up mr-2"></i>
-              Platform Statistics
-            </div>
-            <h2 className="text-3xl font-bold mb-4">Trusted by KMRL</h2>
-          </div>
-          
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div className="group">
-              <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-olive-500 group-hover:bg-opacity-20 transition-all duration-300">
-                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <i className="bx bx-file text-2xl text-white"></i>
-                </div>
-                <div className="text-4xl font-bold mb-2">1000+</div>
-                <div className="text-olive-200 font-medium">Documents Processed</div>
-              </div>
-            </div>
-            <div className="group">
-              <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-olive-500 group-hover:bg-opacity-20 transition-all duration-300">
-                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <i className="bx bx-group text-2xl text-white"></i>
-                </div>
-                <div className="text-4xl font-bold mb-2">50+</div>
-                <div className="text-olive-200 font-medium">Active Users</div>
-              </div>
-            </div>
-            <div className="group">
-              <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-olive-500 group-hover:bg-opacity-20 transition-all duration-300">
-                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <i className="bx bx-buildings text-2xl text-white"></i>
-                </div>
-                <div className="text-4xl font-bold mb-2">4</div>
-                <div className="text-olive-200 font-medium">Departments</div>
-              </div>
-            </div>
-            <div className="group">
-              <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-olive-500 group-hover:bg-opacity-20 transition-all duration-300">
-                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <i className="bx bx-check-shield text-2xl text-white"></i>
-                </div>
-                <div className="text-4xl font-bold mb-2">99%</div>
-                <div className="text-olive-200 font-medium">Uptime</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
   {/* CTA Section removed as requested */}
     </div>

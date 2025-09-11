@@ -1,0 +1,10 @@
+flask
+flask-cors
+flask-bcrypt
+PyJWT
+sentence-transformers
+google-generativeai
+PyPDF2
+python-docx
+pandas
+qdrant-client

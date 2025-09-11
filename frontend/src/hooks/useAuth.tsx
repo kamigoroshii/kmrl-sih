@@ -11,6 +11,7 @@ export interface User {
 interface AuthContextType {
   isAuthenticated: boolean
   currentUser: User | null
+  isLoading: boolean
   login: (username: string, password: string) => Promise<boolean>
   logout: () => void
 }
@@ -29,6 +30,7 @@ const demoCredentials = [
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     // Check if user is already logged in from localStorage
@@ -42,31 +44,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         localStorage.removeItem('kmrl_user')
       }
     }
+    setIsLoading(false)
   }, [])
 
   const login = async (username: string, password: string): Promise<boolean> => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500))
-    
-    const credential = demoCredentials.find(
-      cred => cred.username === username && cred.password === password
-    )
 
-    if (credential) {
-      const user: User = {
-        username: credential.username,
-        department: credential.department,
-        role: credential.role,
-        fullName: credential.fullName
-      }
-      
-      setCurrentUser(user)
-      setIsAuthenticated(true)
-      localStorage.setItem('kmrl_user', JSON.stringify(user))
-      return true
+    // Allow any username and password for demo/testing
+    let user: User;
+    if (username === 'admin') {
+      user = {
+        username: 'admin',
+        department: 'admin',
+        role: 'admin',
+        fullName: 'Administrator'
+      };
+    } else {
+      user = {
+        username,
+        department: 'demo',
+        role: 'staff',
+        fullName: username.charAt(0).toUpperCase() + username.slice(1)
+      };
     }
-    
-    return false
+    setCurrentUser(user)
+    setIsAuthenticated(true)
+    localStorage.setItem('kmrl_user', JSON.stringify(user))
+    return true;
   }
 
   const logout = () => {
@@ -76,7 +81,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, currentUser, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, currentUser, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

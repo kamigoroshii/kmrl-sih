@@ -3,12 +3,15 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import HeroSection from './components/HeroSection'
+import Footer from './components/Footer'
 import DashboardRoute from './components/DashboardRoute'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 
 const AppContent: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { isAuthenticated, currentUser, login, logout } = useAuth()
+  const { isAuthenticated, currentUser, isLoading, login, logout } = useAuth()
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   return (
     <Router>
@@ -19,23 +22,34 @@ const AppContent: React.FC = () => {
           currentUser={currentUser}
           onLogin={login}
           onLogout={logout}
+          loginModalOpen={loginModalOpen}
+          setLoginModalOpen={setLoginModalOpen}
+          selectedDepartment={selectedDepartment}
+          setSelectedDepartment={setSelectedDepartment}
         />
-        
         <Sidebar 
           isOpen={sidebarOpen} 
           onClose={() => setSidebarOpen(false)}
           isAuthenticated={isAuthenticated}
         />
-        
         <main className="transition-all duration-300">
           <Routes>
-            <Route path="/" element={<HeroSection />} />
+            <Route path="/" element={
+              <>
+                <HeroSection onDepartmentLogin={(departmentId) => {
+                  setSelectedDepartment(departmentId);
+                  setLoginModalOpen(true);
+                }} />
+                <Footer />
+              </>
+            } />
             <Route 
               path="/dashboard/:department" 
               element={
                 <DashboardRoute 
                   isAuthenticated={isAuthenticated}
                   currentUser={currentUser}
+                  isLoading={isLoading}
                 />
               } 
             />

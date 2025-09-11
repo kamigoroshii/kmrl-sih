@@ -1,4 +1,8 @@
+
 import json
+import sys
+import logging
+import google.generativeai as genai
 from flask import Flask, request, jsonify, send_from_directory, Response, stream_with_context
 from flask_cors import CORS, cross_origin
 import os
@@ -6,7 +10,7 @@ import pandas as pd
 from io import BytesIO
 from collections import defaultdict
 from rag_toolkit import answer_query
-from llm import generate_response, client
+from llm import generate_response, client, OLLAMA_MODEL
 from flasgger import Swagger
 import re
 import base64
@@ -25,8 +29,8 @@ from bson import ObjectId
 
 
 import uuid 
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 # --- Add logging setup ---
 import logging
@@ -50,6 +54,27 @@ from Ingestion.clip_embedder import embed_image_clip
 from Ingestion.ingest_v2 import describe_image_with_ollama
 
 from typing import cast
+
+import google.generativeai as genai
+# Gemini API key (set this in your environment or directly here)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "YOUR_GEMINI_API_KEY")
+genai.configure(api_key=GEMINI_API_KEY)
+def translate_to_malayalam(text):
+    # Use Gemini to translate English to Malayalam
+    prompt = f"Translate the following text to Malayalam:\n{text}"
+    try:
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(prompt)
+        # Gemini returns a response object; extract the text
+        malayalam = response.text if hasattr(response, 'text') else str(response)
+        return malayalam.strip()
+    except Exception as e:
+        print(f"Gemini translation error: {e}")
+        return text
+def translate_to_malayalam(text):
+    # TODO: Replace with actual translation API or library
+    # For demonstration, just return the original text (implement real translation here)
+    return text
 
 
 app = Flask(__name__)
@@ -114,6 +139,9 @@ conversation_context_agent = ConversationContextAgent(mongo_client)
 
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "dev_secret_key_123")
 
+# Debug: Print the secret key being used
+print(f"[DEBUG] SECRET_KEY loaded: {SECRET_KEY}")
+
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")  # Path of the file's Folder 
 PROCESSED_FILE_PATH = os.path.join(os.getcwd(), "processed_queries.xlsx")
 
@@ -124,13 +152,24 @@ def token_required(f):
         token=None
         auth_header = request.headers.get('Authorization')
         
+        print(f"[DEBUG] Auth header: {auth_header}")
+        
         if auth_header and auth_header.startswith('Bearer '):
             token = auth_header.split(" ")[1]
+            # Remove any angle brackets if present
+            if token.startswith('<') and token.endswith('>'):
+                token = token[1:-1]
+                print(f"[DEBUG] Removed angle brackets from token")
+            print(f"[DEBUG] Token extracted: {token[:50]}...")
+            print(f"[DEBUG] Full token length: {len(token)}")
         else:
+            print("[DEBUG] Token is missing or invalid format")
             return jsonify({'message': 'Token is missing!'}), 401
 
         try:
+            print(f"[DEBUG] Attempting to decode token with SECRET_KEY: {SECRET_KEY}")
             data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            print(f"[DEBUG] Token decoded successfully: {data}")
             user_id = data.get('user_id')
 
             logger.debug(f"[AUTH] Looking up user by string _id: {user_id}")
@@ -173,11 +212,14 @@ def token_required(f):
 
             logger.info(f"[AUTH] ✅ User found: {user.get('username', 'unknown')} (Admin: {user.get('is_admin', False)})")
 
-        except jwt.ExpiredSignatureError:
+        except jwt.ExpiredSignatureError as e:
+            print(f"[DEBUG] Token expired error: {e}")
             return jsonify({'message': 'Token expired!'}), 401
-        except jwt.InvalidTokenError:
+        except jwt.InvalidTokenError as e:
+            print(f"[DEBUG] Invalid token error: {e}")
             return jsonify({'message': 'Invalid token!'}), 401
         except Exception as e:
+            print(f"[DEBUG] Unexpected error in token decoding: {e}")
             logger.error(f"Unexpected error in token decoding: {e}")
             return jsonify({'message': 'Token processing error'}), 500
 
@@ -189,23 +231,27 @@ def token_required(f):
 @app.route("/register", methods=["POST"])
 def register():
     data = request.json
+
     username = data.get("username")
+    email = data.get("email")
     password = data.get("password")
     is_admin = data.get("is_admin", False)  # Allow admin to set admin status
 
-    if not username or not password:
-        return jsonify({"error": "Username and password are required"}), 400
+    if not username or not password or not email:
+        return jsonify({"error": "Username, email, and password are required"}), 400
 
-    existing_user = users_collection.find_one({"username": username})
-    if existing_user:
+    if users_collection.find_one({"username": username}):
         return jsonify({"error": "Username already exists"}), 409
+    if users_collection.find_one({"email": email}):
+        return jsonify({"error": "Email already exists"}), 409
 
     hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
 
     user_id = str(uuid.uuid4())
     users_collection.insert_one({
-        "_id": user_id, 
-        "username": username, 
+        "_id": user_id,
+        "username": username,
+        "email": email,
         "password": hashed_pw,
         "is_admin": is_admin
     })
@@ -240,6 +286,10 @@ def login():
         'user_id': str(user['_id']),
         'exp': datetime.now(timezone.utc) + timedelta(hours=1)
     }, SECRET_KEY, algorithm='HS256')
+
+    print(f"[DEBUG] Generated token with SECRET_KEY: {SECRET_KEY}")
+    print(f"[DEBUG] Token payload: user_id={str(user['_id'])}, exp={datetime.now(timezone.utc) + timedelta(hours=1)}")
+    print(f"[DEBUG] Generated token: {token}")
 
     return jsonify({
         "token": token,
@@ -295,7 +345,6 @@ def chat(current_user):
     current_user = cast(dict, current_user)
     data = request.json
     query = data.get("query")
-    context = data.get("context", "")
     chat_id = data.get("chat_id") 
 
     if not query:
@@ -304,123 +353,112 @@ def chat(current_user):
         return jsonify({"error": "No chat_id provided"}), 400
 
     try:
-        # If no context provided, perform retrieval
-        if not context:
-            chunks, retrieval_mode, answer = answer_query(query)
-            print(f"[DEBUG] answer_query returned {len(chunks)} chunks")
-            print(f"[DEBUG] First chunk structure: {type(chunks[0]) if chunks else 'No chunks'}")
-            if chunks and len(chunks) > 0:
-                print(f"[DEBUG] First chunk: {chunks[0]}")
-                print(f"[DEBUG] First chunk type: {type(chunks[0])}")
-                if isinstance(chunks[0], tuple):
-                    print(f"[DEBUG] First chunk[0] type: {type(chunks[0][0])}")
-                    print(f"[DEBUG] First chunk[1] type: {type(chunks[0][1])}")
-                    print(f"[DEBUG] First chunk[1] content: {chunks[0][1]}")
-        else:
-            chunks, retrieval_mode, answer = [], "context", ""
-
-        # Use conversation context agent to handle follow-up questions
-        contextual_result = conversation_context_agent.generate_contextual_response(
-            query=query,
-            user_id=str(current_user["_id"]),
-            chat_id=chat_id,
-            base_answer=answer,
-            retrieved_context=context
-        )
-        final_answer = contextual_result["answer"]
-        is_followup = contextual_result["is_followup"]
-
-        # Extract used_chunks from the answer (if present)
-        used_chunks = []
-        if "[USED_CHUNKS:" in final_answer:
-            try:
-                used_chunks_section = final_answer.split("[USED_CHUNKS:")[1].split("]")[0]
-                used_chunks = [int(x.strip()) for x in used_chunks_section.split(",") if x.strip().isdigit()]
-                final_answer = final_answer.split("[USED_CHUNKS:")[0].strip()
-            except:
-                used_chunks = list(range(len(chunks)))
-        else:
-            used_chunks = list(range(len(chunks)))
-
-        # Calculate response time and log analytics event
-        response_time = time.time() - start_time
+        print(f"[SIMPLE CHAT] Processing query: {query}")
         
-        # Log analytics event (commented out due to missing analytics service)
-        # try:
-        #     from analytics.service import AnalyticsService
-        #     AnalyticsService.log_event(
-        #         event_type='chat',
-        #         agent_type='document',
-        #         user_id=str(current_user["_id"]),
-        #         session_id=chat_id,
-        #         response_time=response_time,
-        #         status='success',
-        #         metadata={
-        #             'query_length': len(query),
-        #             'response_length': len(final_answer),
-        #             'chunks_retrieved': len(chunks),
-        #             'chunks_used': len(used_chunks),
-        #             'is_followup': is_followup
-        #         }
-        #     )
-        # except Exception as analytics_error:
-        #     print(f"Failed to log analytics: {analytics_error}")
+        # Step 1: Generate embedding for the query
+        print(f"[SIMPLE CHAT] Generating embedding...")
+        embedding_start = time.time()
+        
+        # Use the imported ollama client
+        embedding_response = client.embeddings(
+            model=OLLAMA_MODEL,
+            prompt=query
+        )
+        query_embedding = embedding_response["embedding"]
+        embedding_time = time.time() - embedding_start
+        print(f"[SIMPLE CHAT] Embedding generated in {embedding_time:.2f}s")
+        
+        # Step 2: Search vector database
+        print(f"[SIMPLE CHAT] Searching vector database...")
+        search_start = time.time()
+        
+        from tools.retriever import Retriever
+        retriever = Retriever()
+        
+        # Search main collection
+        search_results = retriever.search_single_collection(
+            query_embedding, 
+            top_k=5, 
+            filters=None, 
+            collection_name="New_Collection"
+        )
+        search_time = time.time() - search_start
+        print(f"[SIMPLE CHAT] Search completed in {search_time:.2f}s, found {len(search_results)} results")
+        
+        # Step 3: Format context from search results
+        context_chunks = []
+        for result in search_results:
+            # result is a tuple: (text, source, score, vector_type)
+            chunk_text = result[0]  # text
+            source = result[1]      # source
+            score = result[2]       # score
+            context_chunks.append((chunk_text, source))
+            print(f"[SIMPLE CHAT] Found chunk from {source} with score {score:.3f}")
+        
+        # Step 4: Generate response using LLM
+        print(f"[SIMPLE CHAT] Generating LLM response...")
+        llm_start = time.time()
+        
+        if context_chunks:
+            # Build context string
+            context_str = "\n\n".join([f"Source: {source}\n{chunk}" for chunk, source in context_chunks])
+            
+            # Simple prompt
+            prompt = f"""Context:
+{context_str}
 
-        def format_pdf_url(src):
-            # Remove .pdf if present, then add .pdf once
-            filename = src.split(' - Page ')[0]
-            if filename.endswith('.pdf'):
-                filename = filename[:-4]
-            if ' - Page ' in src:
-                page = src.split(' - Page ')[1]
-                return f"/pdf/{filename}.pdf?page={page}"
-            else:
-                return f"/pdf/{filename}.pdf"
+Question: {query}
 
+Please answer the question based on the context above. If the context doesn't contain enough information, say so clearly."""
+            
+            # Generate response
+            response = client.chat(
+                model=OLLAMA_MODEL,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                stream=False
+            )
+            
+            final_answer = response.get('message', {}).get('content', 'No response generated')
+        else:
+            final_answer = "I couldn't find any relevant information in the database to answer your question."
+        
+        llm_time = time.time() - llm_start
+        print(f"[SIMPLE CHAT] LLM response generated in {llm_time:.2f}s")
+        
+        # Step 5: Save to database and return response
+        total_time = time.time() - start_time
+        print(f"[SIMPLE CHAT] Total processing time: {total_time:.2f}s")
+        
+        # Format sources for response
         sources = [
             {
                 "id": f"source_{i}",
-                "title": src,
-                "url": format_pdf_url(src),
-                "snippet": chunk[:200] + "..." if len(chunk) > 200 else chunk,
-                "group": "Used by AI"
-            } for i, (chunk, src) in enumerate(chunks)
+                "title": source,
+                "snippet": chunk[:200] + "..." if len(chunk) > 200 else chunk
+            } for i, (chunk, source) in enumerate(context_chunks)
         ]
+        
+        # Save to chat history
         chats_collection.insert_one({
             "user_id": str(current_user["_id"]),
             "chat_id": chat_id,
             "question": query,
             "answer": final_answer,
-            "context": context, 
             "sources": sources,
-            "used_chunks": used_chunks,
             "timestamp": datetime.now(timezone.utc)
         })
+        
         return jsonify({
             "answer": final_answer,
-            "context": context,
             "sources": sources,
-            "used_chunks": used_chunks,
-            "is_followup": is_followup
+            "processing_time": f"{total_time:.2f}s",
+            "chunks_found": len(context_chunks)
         })
         
     except Exception as e:
-        # Log error analytics event (commented out due to missing analytics service)
-        response_time = time.time() - start_time
-        # try:
-        #     from analytics.service import AnalyticsService
-        #     AnalyticsService.log_event(
-        #         event_type='chat',
-        #         agent_type='document',
-        #         user_id=str(current_user["_id"]),
-        #         session_id=chat_id,
-        #         response_time=response_time,
-        #         status='error',
-        #         error_message=str(e)
-        #     )
-        # except:
-        #     pass
-        
+        print(f"[SIMPLE CHAT ERROR] {str(e)}")
         return jsonify({"error": f"Error processing chat: {str(e)}"}), 500
 
 @app.route("/create-chat", methods=["POST"])
@@ -1228,12 +1266,12 @@ def admin_ingest(current_user):
                     print(f"[ERROR] LLM description failed: {e}")
                     image_description = "[NO DESCRIPTION]"
 
-                # --- NEW: Add to Agentic_RAGv2_CLIP collection ---
+                # --- NEW: Add to New_Collection_CLIP collection ---
                 try:
                     from qdrant_client import QdrantClient
                     from qdrant_client.http import models
                     clip_client = QdrantClient(url="http://localhost:6333")
-                    clip_collection = "Agentic_RAGv2_CLIP"
+                    clip_collection = "New_Collection_CLIP"
                     # Ensure CLIP collection exists
                     existing_collections = clip_client.get_collections().collections
                     if clip_collection not in [c.name for c in existing_collections]:
@@ -1263,7 +1301,7 @@ def admin_ingest(current_user):
                             vector=clip_embedding,
                             payload=clip_metadata
                         )])
-                        print(f"[INFO] Image {file.filename} added to Agentic_RAGv2_CLIP with description.")
+                        print(f"[INFO] Image {file.filename} added to New_Collection_CLIP with description.")
                 except Exception as e:
                     print(f"[ERROR] Failed to add image to CLIP collection: {e}")
                 
@@ -1291,7 +1329,7 @@ def admin_ingest(current_user):
             from qdrant_client.http import models
             
             client = QdrantClient(url="http://localhost:6333")
-            collection_name = "Agentic_RAGv2"
+            collection_name = "New_Collection"
             
             # Ensure collection exists
             existing_collections = client.get_collections().collections
@@ -1345,6 +1383,17 @@ def admin_ingest(current_user):
     except Exception as e:
         print(f"Error during ingestion: {e}")
         return jsonify({"error": f"Failed to ingest file: {str(e)}"}), 500
+
+@app.route('/test-auth', methods=['GET'])
+@token_required
+def test_auth(user):
+    """Simple endpoint to test token authentication"""
+    return jsonify({
+        "message": "Authentication successful!",
+        "user_id": str(user.get('_id')),
+        "username": user.get('username'),
+        "is_admin": user.get('is_admin', False)
+    })
 
 if __name__ == "__main__":
     # Print all users on startup for easy reference

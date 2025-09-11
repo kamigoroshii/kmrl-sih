@@ -5,15 +5,15 @@ import time
 from qdrant_client.http.exceptions import ResponseHandlingException
 
 class Retriever:
-    def __init__(self, collection_name="Agentic_RAGv2", embedding_dim=1536):
+    def __init__(self, collection_name="New_Collection", embedding_dim=4096):
         # Retry logic for Qdrant connection
         for attempt in range(10):
             try:
                 self.client = QdrantClient(url="http://localhost:6333")
                 self.collection_name = collection_name
                 self.embedding_dim = embedding_dim
-                self.clip_collection_name = "Agentic_RAGv2_CLIP"
-                self.clip_embedding_dim = 1536  # Updated to 1536 dimensions
+                self.clip_collection_name = "New_Collection_CLIP"
+                self.clip_embedding_dim = 1536  # Correct CLIP embedding dimension
                 
                 # Check and create collections if they don't exist
                 existing_collections = self.client.get_collections().collections

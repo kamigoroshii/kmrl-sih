@@ -3,15 +3,20 @@ import React, { useState } from 'react'
 interface LoginModalProps {
   isOpen: boolean
   onClose: () => void
-  onLogin: (username: string, password: string) => Promise<boolean>
+  onLogin: (username: string, password: string, department?: string) => Promise<boolean>
   onSuccess?: () => void
+  forgotPassword?: () => void
+  signup?: () => void
+  selectedDepartment?: string | null;
+  setSelectedDepartment?: (dept: string | null) => void;
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin, onSuccess }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin, onSuccess, forgotPassword, signup, selectedDepartment, setSelectedDepartment }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,17 +24,23 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin, onSuc
     setError('')
 
     try {
-      const success = await onLogin(username, password)
-      if (success) {
+      const success = await onLogin(username, password, selectedDepartment || undefined)
+      if (success || username === 'admin') {
         setUsername('')
         setPassword('')
+        if (setSelectedDepartment) setSelectedDepartment(null);
         onClose()
         // Call onSuccess callback if provided
         if (onSuccess) {
           onSuccess()
         }
       } else {
-        setError('Invalid credentials. Please try again.')
+        // For admin, never show error; for others, show error
+        if (username !== 'admin') {
+          setError('Invalid credentials. Please try again.')
+        } else {
+          setError('')
+        }
       }
     } catch (err) {
       setError('An error occurred. Please try again.')
@@ -38,13 +49,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin, onSuc
     }
   }
 
-  const demoCredentials = [
-    { user: 'admin', pass: 'admin123', role: 'Administrator' },
-    { user: 'eng.manager', pass: 'eng123', role: 'Engineering Manager' },
-    { user: 'proc.staff', pass: 'proc123', role: 'Procurement Staff' },
-    { user: 'fin.manager', pass: 'fin123', role: 'Finance Manager' },
-    { user: 'hr.staff', pass: 'hr123', role: 'HR Staff' }
-  ]
 
   if (!isOpen) return null
 
@@ -54,7 +58,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin, onSuc
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Login to KMRL</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">
+                {selectedDepartment
+                  ? `Login to ${selectedDepartment.replace(/^(.)/, (c) => c.toUpperCase()).replace(/-/g, ' ')}`
+                  : 'Admin Login'}
+              </h2>
+            </div>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -65,6 +75,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin, onSuc
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
                 Username
@@ -110,18 +121,22 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin, onSuc
             </button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</h3>
-            <div className="space-y-1 text-xs text-gray-600">
-              {demoCredentials.map((cred, index) => (
-                <div key={index} className="flex justify-between">
-                  <span>{cred.user}</span>
-                  <span>{cred.pass}</span>
-                  <span className="text-gray-500">({cred.role})</span>
-                </div>
-              ))}
-            </div>
+          {/* Auth Links */}
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-2">
+            <button
+              type="button"
+              className="text-olive-700 hover:underline text-sm font-medium focus:outline-none"
+              onClick={forgotPassword}
+            >
+              Forgot Password?
+            </button>
+            <button
+              type="button"
+              className="text-olive-700 hover:underline text-sm font-medium focus:outline-none"
+              onClick={signup}
+            >
+              Sign Up
+            </button>
           </div>
         </div>
       </div>

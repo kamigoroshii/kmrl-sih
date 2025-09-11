@@ -4,15 +4,29 @@ import EngineeringDashboard from '../dashboards/EngineeringDashboard'
 import ProcurementDashboard from '../dashboards/ProcurementDashboard'
 import FinanceDashboard from '../dashboards/FinanceDashboard'
 import HRDashboard from '../dashboards/HRDashboard'
+import MaintenanceOperationsDashboard from '../dashboards/MaintenanceOperationsDashboard'
 import type { User } from '../hooks/useAuth'
 
 interface DashboardRouteProps {
   isAuthenticated: boolean
   currentUser: User | null
+  isLoading: boolean
 }
 
-const DashboardRoute: React.FC<DashboardRouteProps> = ({ isAuthenticated, currentUser }) => {
+const DashboardRoute: React.FC<DashboardRouteProps> = ({ isAuthenticated, currentUser, isLoading }) => {
   const { department } = useParams<{ department: string }>()
+
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-olive-50 to-beige-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600 mx-auto mb-4"></div>
+          <p className="text-olive-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
@@ -49,6 +63,8 @@ const DashboardRoute: React.FC<DashboardRouteProps> = ({ isAuthenticated, curren
         return <FinanceDashboard currentUser={currentUser} />
       case 'hr':
         return <HRDashboard currentUser={currentUser} />
+      case 'maintenance-operations':
+        return <MaintenanceOperationsDashboard currentUser={currentUser} />
       default:
         return (
           <div className="min-h-screen bg-gradient-to-br from-olive-50 to-beige-50 flex items-center justify-center">

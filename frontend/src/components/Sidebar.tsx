@@ -12,6 +12,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isAuthenticated }) =
 
   const departments = [
     { id: 'engineering', name: 'Engineering', icon: 'bx bx-cog', color: 'text-olive-500' },
+    { id: 'maintenance-operations', name: 'Operations & Maintenance', icon: 'bx bx-wrench', color: 'text-olive-800' },
     { id: 'procurement', name: 'Procurement', icon: 'bx bx-package', color: 'text-olive-600' },
     { id: 'finance', name: 'Finance', icon: 'bx bx-dollar-circle', color: 'text-olive-400' },
     { id: 'hr', name: 'Human Resources', icon: 'bx bx-group', color: 'text-olive-700' }

@@ -54,14 +54,25 @@ def generate_response(prompt, context_chunks):
     user_message = f"Context:\n{context}\n\nUser Question:\n{prompt}"
 
     try:
+        print(f"[LLM] Generating response with model {OLLAMA_MODEL}...")
+        print(f"[LLM] Context length: {len(context)} characters")
+        print(f"[LLM] Prompt: {prompt[:100]}...")
+        
         response = ollama.chat(
             model=OLLAMA_MODEL,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message}
             ],
-            stream=False
+            stream=False,
+            options={
+                "temperature": 0.7,
+                "num_predict": 1000,  # Limit response length
+                "stop": ["\n\n\n", "END_RESPONSE"]  # Add stop tokens
+            }
         )
+        
+        print(f"[LLM] Response generated successfully")
 
         content = response.get('message', {}).get('content', '')
         if not content:

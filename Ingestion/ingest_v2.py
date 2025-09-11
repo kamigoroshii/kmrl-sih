@@ -168,14 +168,14 @@ def load_pdf_with_type_detection(pdf_path):
         # Digital: use existing loader
         return loader.load_pdf(pdf_path)
 
-def ingest_folder(folder_path, collection_name="Agentic_RAGv2", embedding_dim=1536, batch_size=500):
+def ingest_folder(folder_path, collection_name="New_Collection", embedding_dim=4096, batch_size=500):
     # Use Qdrant connection info from environment or docker-compose defaults
     qdrant_host = os.environ.get("QDRANT_HOST", "localhost")
     qdrant_port = os.environ.get("QDRANT_PORT", "6333")
     qdrant_url = f"http://{qdrant_host}:{qdrant_port}"
     client = QdrantClient(url=qdrant_url)
     clip_client = QdrantClient(url=qdrant_url)
-    clip_collection = "Agentic_RAGv2_CLIP"
+    clip_collection = "New_Collection_CLIP"
     # Ensure CLIP collection exists
     existing_collections = client.get_collections().collections
     if clip_collection not in [c.name for c in existing_collections]:
@@ -237,12 +237,34 @@ def ingest_folder(folder_path, collection_name="Agentic_RAGv2", embedding_dim=15
                         try:
                             pix = loader.fitz.Pixmap(doc, xref)
                             try:
-                                if pix.n >= 5:
+                                # Handle different colorspaces
+                                if pix.n >= 5:  # CMYK or other complex colorspace
                                     pix_converted = loader.fitz.Pixmap(loader.fitz.csRGB, pix)
                                     pix_converted.save(img_path)
                                     pix_converted = None
-                                else:
+                                elif pix.colorspace and pix.colorspace.name in ['DeviceGray', 'DeviceRGB']:
                                     pix.save(img_path)
+                                else:
+                                    # Convert to RGB for unsupported colorspaces
+                                    pix_rgb = loader.fitz.Pixmap(loader.fitz.csRGB, pix)
+                                    pix_rgb.save(img_path)
+                                    pix_rgb = None
+                            except Exception as save_error:
+                                # Fallback: try saving as JPEG instead of PNG
+                                img_base_jpg = f"page_{page_num+1}_img_{img_idx}.jpg"
+                                img_path_jpg = os.path.join(image_dir, img_base_jpg)
+                                try:
+                                    if pix.n >= 5:
+                                        pix_converted = loader.fitz.Pixmap(loader.fitz.csRGB, pix)
+                                        pix_converted.save(img_path_jpg)
+                                        pix_converted = None
+                                    else:
+                                        pix.save(img_path_jpg)
+                                    img_path = img_path_jpg  # Use JPG path instead
+                                    img_base = img_base_jpg
+                                except Exception as jpg_error:
+                                    print(f"[WARNING] Failed to save image as both PNG and JPG: {save_error}, {jpg_error}")
+                                    raise save_error
                             finally:
                                 pix = None
                             # Generate description

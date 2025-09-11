@@ -13,7 +13,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         collection = sys.argv[1]
     else:
-        collection = "Agentic_RAGv2"
+        collection = "New_Collection"
     delete_all_points(collection)
     # To delete from the CLIP collection as well, uncomment the next line:
-    delete_all_points("Agentic_RAGv2_CLIP") 
+    delete_all_points("New_Collection_CLIP") 
