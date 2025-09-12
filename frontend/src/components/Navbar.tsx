@@ -22,6 +22,8 @@ interface NavbarProps {
   onLogout: () => void
   loginModalOpen?: boolean
   setLoginModalOpen?: (open: boolean) => void
+  selectedDepartment: string | null
+  setSelectedDepartment: (dept: string) => void
 }
 
 function Navbar({
@@ -31,6 +33,8 @@ function Navbar({
   onLogout,
   loginModalOpen: loginModalOpenProp,
   setLoginModalOpen: setLoginModalOpenProp,
+  selectedDepartment,
+  setSelectedDepartment,
 }: NavbarProps): JSX.Element {
   // Modal state
   const [internalLoginModalOpen, setInternalLoginModalOpen] = useState(false)
@@ -68,6 +72,7 @@ function Navbar({
   // Handlers
   const handleDepartmentSelect = (departmentId: string) => {
     setDepartmentDropdownOpen(false)
+    setSelectedDepartment(departmentId);
     navigate(`/dashboard/${departmentId}`)
   }
 
@@ -95,6 +100,7 @@ function Navbar({
               />
             </Link>
 
+
             {/* 1. Home Link */}
             <Link
               to="/"
@@ -104,6 +110,7 @@ function Navbar({
               Home
             </Link>
 
+
             {/* 2. Departments Dropdown */}
             <div ref={departmentDropdownRef} className="relative">
               <button
@@ -111,7 +118,9 @@ function Navbar({
                 className="font-medium px-3 py-2 rounded-lg transition-colors text-white
                   hover:bg-olive-700 hover:text-white focus:bg-olive-800 focus:text-white"
               >
-                Departments
+                {selectedDepartment
+                  ? departments.find(d => d.id === selectedDepartment)?.name || 'Departments'
+                  : 'Departments'}
                 <span className="ml-2">
                   <i className={`bx bx-chevron-down text-lg transition-transform ${departmentDropdownOpen ? 'rotate-180' : ''}`}></i>
                 </span>

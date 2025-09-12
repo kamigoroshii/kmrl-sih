@@ -5,7 +5,7 @@ import os
 BACKEND_URL = "http://localhost:5001"
 DATA_FOLDER = "data"
 
-def upload_file(file_path, filename):
+def upload_file(file_path, filename):  # Removed stray 'a' character
     """Upload a single file to the backend"""
     try:
         with open(file_path, 'rb') as f:

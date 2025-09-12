@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import AlertsPopup from './components/AlertsPopup'
 import Sidebar from './components/Sidebar'
 import HeroSection from './components/HeroSection'
 import Footer from './components/Footer'
@@ -27,6 +28,8 @@ const AppContent: React.FC = () => {
           selectedDepartment={selectedDepartment}
           setSelectedDepartment={setSelectedDepartment}
         />
+        {isAuthenticated && <AlertsPopup />}
+        {isAuthenticated && <AlertsPopup />}
         <Sidebar 
           isOpen={sidebarOpen} 
           onClose={() => setSidebarOpen(false)}
