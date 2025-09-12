@@ -494,11 +494,73 @@ export const ChatUI: React.FC<ChatUIProps> = ({
                             <i className="bx bx-dislike text-red-600 text-lg"></i>
                           </button>
                           <button
-                            className="p-1 rounded hover:bg-gray-200"
-                            title="Copy"
-                            onClick={() => navigator.clipboard.writeText(message.content)}
+                            className="p-1 rounded hover:bg-blue-100"
+                            title="Copy response"
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(message.content);
+                                // Show temporary success feedback
+                                const button = event?.currentTarget as HTMLButtonElement;
+                                if (button) {
+                                  const originalContent = button.innerHTML;
+                                  button.innerHTML = '<i class="bx bx-check text-green-600 text-lg"></i>';
+                                  setTimeout(() => {
+                                    button.innerHTML = originalContent;
+                                  }, 1500);
+                                }
+                              } catch (err) {
+                                console.error('Failed to copy:', err);
+                                alert('Failed to copy to clipboard');
+                              }
+                            }}
                           >
-                            <i className="bx bx-copy text-gray-600 text-lg"></i>
+                            <i className="bx bx-copy text-blue-600 text-lg"></i>
+                          </button>
+                          <button
+                            className="p-1 rounded hover:bg-purple-100"
+                            title="Share response"
+                            onClick={async () => {
+                              const shareData = {
+                                title: 'KMRL Chat Response',
+                                text: `Question: ${messages.find(m => m.sender === 'user' && m.timestamp <= message.timestamp)?.content || 'N/A'}\n\nAnswer: ${message.content}`,
+                                url: window.location.href
+                              };
+                              
+                              if (navigator.share) {
+                                try {
+                                  await navigator.share(shareData);
+                                } catch (err) {
+                                  if ((err as Error).name !== 'AbortError') {
+                                    console.error('Error sharing:', err);
+                                    // Fallback to clipboard
+                                    try {
+                                      await navigator.clipboard.writeText(shareData.text);
+                                      alert('Response copied to clipboard for sharing!');
+                                    } catch (clipErr) {
+                                      console.error('Failed to copy to clipboard:', clipErr);
+                                    }
+                                  }
+                                }
+                              } else {
+                                // Fallback for browsers without Web Share API
+                                try {
+                                  await navigator.clipboard.writeText(shareData.text);
+                                  alert('Response copied to clipboard for sharing!');
+                                } catch (err) {
+                                  console.error('Failed to copy to clipboard:', err);
+                                  // Final fallback - create a temporary textarea
+                                  const textarea = document.createElement('textarea');
+                                  textarea.value = shareData.text;
+                                  document.body.appendChild(textarea);
+                                  textarea.select();
+                                  document.execCommand('copy');
+                                  document.body.removeChild(textarea);
+                                  alert('Response copied to clipboard for sharing!');
+                                }
+                              }
+                            }}
+                          >
+                            <i className="bx bx-share text-purple-600 text-lg"></i>
                           </button>
                           <button
                             className="flex items-center space-x-1 px-2 py-1 rounded text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors"

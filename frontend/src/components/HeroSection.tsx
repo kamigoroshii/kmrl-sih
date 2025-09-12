@@ -4,9 +4,10 @@ import RecentActivityFeed from './Recentactivityfeed'
 
 interface HeroSectionProps {
   onDepartmentLogin?: (departmentId: string) => void;
+  isAuthenticated?: boolean;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ onDepartmentLogin }) => {
+const HeroSection: React.FC<HeroSectionProps> = ({ onDepartmentLogin, isAuthenticated }) => {
 
 
 
@@ -14,7 +15,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDepartmentLogin }) => {
   const departmentOverview = [
     {
       id: 'operations',
-      name: 'Maintenance & Operations',
+      name: 'Maintenance',
       icon: (
         <i className="bx bx-cog text-3xl text-olive-700"></i>
       ),
@@ -41,7 +42,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDepartmentLogin }) => {
     },
     {
       id: 'hr',
-      name: 'Human Resources',
+      name: 'HR',
       icon: (
         <i className="bx bx-group text-3xl text-olive-700"></i>
       ),
@@ -158,7 +159,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDepartmentLogin }) => {
       </section>
 
   {/* Department Overview Section */}
-  <section className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-white to-olive-50">
+  <section className="py-12 w-full flex items-center justify-center bg-gradient-to-b from-white to-olive-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             {/* Removed 'Our Departments' label as requested */}
@@ -171,25 +172,27 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDepartmentLogin }) => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">
             {departmentOverview.map((dept, index) => (
               <div key={index} className="group" tabIndex={0} role="region" aria-label={`Login to ${dept.name}`}
                 onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { onDepartmentLogin && onDepartmentLogin(dept.id); } }}>
                 <div
-                  className="block rounded-2xl shadow-lg p-8 text-center transition-all duration-500 border border-olive-300 focus:ring-4 focus:ring-olive-400 group-hover:shadow-2xl group-hover:-translate-y-2 group-hover:border-olive-600 group-active:scale-95 group-active:bg-olive-100 bg-gradient-to-br from-olive-50 to-olive-200 group-hover:from-olive-200 group-hover:to-olive-400"
+                  className="rounded-2xl shadow-lg p-4 text-center transition-all duration-500 border border-olive-300 focus:ring-4 focus:ring-olive-400 group-hover:shadow-2xl group-hover:-translate-y-2 group-hover:border-olive-600 group-active:scale-95 group-active:bg-olive-100 bg-gradient-to-br from-olive-50 to-olive-200 group-hover:from-olive-200 group-hover:to-olive-400 aspect-square flex flex-col justify-between w-full h-full"
                   style={{ textDecoration: 'none' }}
                 >
-                  <div className="w-20 h-20 bg-gradient-to-br from-olive-600 to-olive-700 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 transition-transform duration-300 shadow-lg group-hover:scale-110 group-hover:bg-olive-800 group-active:scale-95">
-                    {dept.icon}
+                  <div className="flex flex-col items-center flex-1 justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-olive-600 to-olive-700 rounded-lg flex items-center justify-center text-white mx-auto mb-3 transition-transform duration-300 shadow-lg group-hover:scale-110 group-hover:bg-olive-800 group-active:scale-95">
+                      {dept.icon}
+                    </div>
+                    <h3 className="text-base font-bold text-olive-800 mb-2 transition-colors duration-300 group-hover:text-olive-900 group-active:text-olive-900 text-center leading-tight">{dept.name}</h3>
+                    <p className="text-xs text-olive-700 leading-snug group-hover:text-olive-900 group-active:text-olive-900 mb-3 text-center line-clamp-3">{dept.description}</p>
                   </div>
-                  <h3 className="text-xl font-bold text-olive-800 mb-4 transition-colors duration-300 group-hover:text-olive-900 group-active:text-olive-900">{dept.name}</h3>
-                  <p className="text-olive-700 leading-relaxed group-hover:text-olive-900 group-active:text-olive-900 mb-6">{dept.description}</p>
                   <button
                     onClick={() => onDepartmentLogin && onDepartmentLogin(dept.id)}
-                    className="mt-2 bg-gradient-to-r from-olive-600 to-olive-700 text-white px-6 py-2 rounded-lg font-semibold text-base transition-all duration-300 shadow focus:outline-none focus:ring-2 focus:ring-olive-400 hover:from-olive-700 hover:to-olive-800 hover:scale-105 hover:shadow-xl active:scale-95 active:bg-olive-800"
+                    className="w-full bg-gradient-to-r from-olive-600 to-olive-700 text-white px-3 py-1.5 rounded-lg font-semibold text-xs transition-all duration-300 shadow focus:outline-none focus:ring-2 focus:ring-olive-400 hover:from-olive-700 hover:to-olive-800 hover:scale-105 hover:shadow-xl active:scale-95 active:bg-olive-800"
                     aria-label={`Login to ${dept.name}`}
                   >
-                    Login
+                    Enter
                   </button>
                 </div>
               </div>
@@ -198,9 +201,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDepartmentLogin }) => {
         </div>
       </section>
 
-
       {/* Document Flow Section */}
-  <section className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-olive-50 to-white">
+  <section className="py-20 w-full flex items-center justify-center bg-gradient-to-b from-olive-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
@@ -266,23 +268,25 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDepartmentLogin }) => {
       </section>
 
 
-      {/* Recent Activity Feed Section (formerly Department Document Overview) */}
-  <section className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-olive-50">
-    {/* Cool Background Pattern */}
-    <div className="absolute inset-0 pointer-events-none z-0">
-      <div className="absolute top-10 left-10 w-96 h-96 bg-olive-300 opacity-30 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 right-0 w-[32rem] h-[32rem] bg-olive-500 opacity-20 rounded-full blur-3xl"></div>
-      <div className="absolute top-1/2 left-1/2 w-1/2 h-1/2 bg-white opacity-10 rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2"></div>
-    </div>
-    <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center">
-      {/* Centered Section Title */}
-  <h2 className="text-4xl font-bold text-gray-900 text-center mb-4">Recent Activity Feed</h2>
-      {/* Prominent Feed Box */}
-  <div className="w-full rounded-3xl p-10 relative">
-        <RecentActivityFeed />
-      </div>
-    </div>
-  </section>
+      {/* Recent Activity Feed Section (formerly Department Document Overview) - Only show when authenticated */}
+      {isAuthenticated && (
+        <section className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-olive-50">
+          {/* Cool Background Pattern */}
+          <div className="absolute inset-0 pointer-events-none z-0">
+            <div className="absolute top-10 left-10 w-96 h-96 bg-olive-300 opacity-30 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-0 w-[32rem] h-[32rem] bg-olive-500 opacity-20 rounded-full blur-3xl"></div>
+            <div className="absolute top-1/2 left-1/2 w-1/2 h-1/2 bg-white opacity-10 rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2"></div>
+          </div>
+          <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center">
+            {/* Centered Section Title */}
+            <h2 className="text-4xl font-bold text-gray-900 text-center mb-4">Recent Activity Feed</h2>
+            {/* Prominent Feed Box */}
+            <div className="w-full rounded-3xl p-10 relative">
+              <RecentActivityFeed />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Testimonials Section */}
   <section className="min-h-[80vh] py-20 md:py-28 bg-white flex items-center">

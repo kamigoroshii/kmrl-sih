@@ -19,16 +19,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onRefresh }) =
 
   const fetchDocuments = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await fetch('http://localhost:5001/api/documents', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await fetch('http://localhost:5001/api/documents');
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -53,16 +44,8 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onRefresh }) =
 
     setIsClearing(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication required');
-      }
-
       const response = await fetch('http://localhost:5001/api/documents/clear', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
 
       if (!response.ok) {

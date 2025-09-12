@@ -51,27 +51,48 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500))
 
-    // Allow any username and password for demo/testing
-    let user: User;
+    // Check demo credentials first
+    const foundCredential = demoCredentials.find(
+      cred => cred.username === username && cred.password === password
+    )
+
+    if (foundCredential) {
+      const user: User = {
+        username: foundCredential.username,
+        department: foundCredential.department,
+        role: foundCredential.role,
+        fullName: foundCredential.fullName
+      }
+      setCurrentUser(user)
+      setIsAuthenticated(true)
+      localStorage.setItem('kmrl_user', JSON.stringify(user))
+      return true
+    }
+
+    // Fallback for any other username/password (demo mode)
     if (username === 'admin') {
-      user = {
+      const user: User = {
         username: 'admin',
         department: 'admin',
         role: 'admin',
         fullName: 'Administrator'
-      };
+      }
+      setCurrentUser(user)
+      setIsAuthenticated(true)
+      localStorage.setItem('kmrl_user', JSON.stringify(user))
+      return true
     } else {
-      user = {
+      const user: User = {
         username,
         department: 'demo',
         role: 'staff',
         fullName: username.charAt(0).toUpperCase() + username.slice(1)
-      };
+      }
+      setCurrentUser(user)
+      setIsAuthenticated(true)
+      localStorage.setItem('kmrl_user', JSON.stringify(user))
+      return true
     }
-    setCurrentUser(user)
-    setIsAuthenticated(true)
-    localStorage.setItem('kmrl_user', JSON.stringify(user))
-    return true;
   }
 
   const logout = () => {

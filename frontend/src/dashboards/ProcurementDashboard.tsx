@@ -60,7 +60,7 @@ const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({ currentUser
     { id: 'purchase-orders', name: 'Purchase Orders', icon: 'bx-edit' },
     { id: 'contracts', name: 'Contracts', icon: 'bx-clipboard' },
     { id: 'inventory', name: 'Inventory', icon: 'bx-package' },
-    { id: 'documents', name: 'Document Management', icon: 'bx-file' }
+    { id: 'documents', name: 'Document ', icon: 'bx-file' }
   ]
 
   const procurementStats = [

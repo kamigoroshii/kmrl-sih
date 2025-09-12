@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 interface UserProfileModalProps {
   isOpen: boolean
   onClose: () => void
-  currentUser: { name: string; fullName?: string; role?: string; department?: string; email?: string } | null
+  currentUser: { fullName: string; role?: string; department?: string; email?: string } | null
   onUpdateProfile: (updatedUser: any) => void
 }
 
@@ -15,7 +15,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('profile')
   const [profileData, setProfileData] = useState({
-    fullName: currentUser?.fullName || currentUser?.name || '',
+    fullName: currentUser?.fullName || '',
     email: currentUser?.email || 'admin@kmrl.org',
     role: currentUser?.role || 'Administrator',
     department: currentUser?.department || 'Administration',
@@ -84,9 +84,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
               {/* User Avatar and Basic Info */}
               <div className="text-center mb-6">
                 <div className="w-20 h-20 bg-olive-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
-                  {currentUser?.name?.[0]?.toUpperCase() || 'A'}
+                  {currentUser?.fullName?.[0]?.toUpperCase() || 'A'}
                 </div>
-                <h3 className="font-semibold text-olive-800">{currentUser?.name || 'Administrator'}</h3>
+                <h3 className="font-semibold text-olive-800">{currentUser?.fullName || 'Administrator'}</h3>
                 <p className="text-sm text-olive-600">{profileData.role}</p>
               </div>
 
