@@ -7,6 +7,16 @@ interface Message {
   content: string;
   sender: 'user' | 'assistant';
   timestamp: string;
+  sources?: Array<{
+    id: string;
+    title: string;
+    snippet: string;
+    score: number;
+    chunk_index: number;
+    filename: string;
+    page_number?: number;
+    file_type?: string;
+  }>;
 }
 
 interface ChatUIProps {
@@ -35,7 +45,7 @@ export const ChatUI: React.FC<ChatUIProps> = ({
   const [chatHistory, setChatHistory] = useState<{[chatId: string]: any[]}>({});
   const [currentChatId, setCurrentChatId] = useState<string>('');
   const [viewerOpen, setViewerOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<{id: string, name: string, type: string} | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<{id: string, name: string, type: string, page?: number} | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -43,9 +53,22 @@ export const ChatUI: React.FC<ChatUIProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleViewSource = async () => {
+  const handleViewSource = async (message?: Message) => {
     try {
-      // Fetch available documents from backend
+      // If message with sources is provided, use the first source with page info
+      if (message && message.sources && message.sources.length > 0) {
+        const firstSource = message.sources[0];
+        setSelectedDocument({
+          id: firstSource.filename.replace(/[^a-zA-Z0-9]/g, '-'),
+          name: firstSource.filename,
+          type: firstSource.file_type || '.pdf',
+          page: firstSource.page_number
+        });
+        setViewerOpen(true);
+        return;
+      }
+
+      // Fallback to original behavior - fetch available documents
       const response = await fetch('http://localhost:5001/api/documents');
       const data = await response.json();
       
@@ -204,6 +227,7 @@ export const ChatUI: React.FC<ChatUIProps> = ({
         content: data.response,
         sender: 'assistant',
         timestamp: new Date().toISOString(),
+        sources: data.sources || []
       };
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
@@ -565,7 +589,7 @@ export const ChatUI: React.FC<ChatUIProps> = ({
                           <button
                             className="flex items-center space-x-1 px-2 py-1 rounded text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors"
                             title="View Source Document"
-                            onClick={handleViewSource}
+                            onClick={() => handleViewSource(message)}
                           >
                             <i className="bx bx-file-pdf text-blue-600"></i>
                             <span>View Source</span>

@@ -525,13 +525,25 @@ def chat():
         # Format sources for frontend
         sources = []
         for chunk in relevant_chunks:
-            sources.append({
+            source_info = {
                 'id': f"source_{len(sources)}",
                 'title': chunk['filename'],
                 'snippet': chunk['text'][:200] + '...' if len(chunk['text']) > 200 else chunk['text'],
                 'score': round(chunk['score'], 3),
-                'chunk_index': chunk['chunk_index']
-            })
+                'chunk_index': chunk['chunk_index'],
+                'filename': chunk['filename']
+            }
+            
+            # Add page information if available
+            if 'metadata' in chunk and chunk['metadata']:
+                metadata = chunk['metadata']
+                if 'page_number' in metadata:
+                    source_info['page_number'] = metadata['page_number']
+                    source_info['title'] = f"{chunk['filename']} - Page {metadata['page_number']}"
+                if 'file_type' in metadata:
+                    source_info['file_type'] = metadata['file_type']
+            
+            sources.append(source_info)
         
         # Save to chat history
         ChatManager.save_chat_message(
@@ -544,7 +556,8 @@ def chat():
         
         return jsonify({
             'response': response,
-            'chat_id': chat_id
+            'chat_id': chat_id,
+            'sources': sources
         })
         
     except Exception as e:

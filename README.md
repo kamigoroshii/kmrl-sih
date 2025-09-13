@@ -1,4 +1,4 @@
-# RAG Backend System
+# KMRL Document Management System
 
 A comprehensive backend system for Retrieval-Augmented Generation (RAG) with document processing, chat functionality, and image analysis capabilities.
 
@@ -6,29 +6,75 @@ A comprehensive backend system for Retrieval-Augmented Generation (RAG) with doc
 
 ### Prerequisites
 - Python 3.8+
-- MongoDB
+- Node.js 18+ (for frontend)
+- MongoDB (optional - will use in-memory storage if not available)
 - Qdrant Vector Database
-- OpenAI API Key
+- Gemini API Key
 
 ### Installation
 
 1. **Clone and setup:**
    ```bash
-   cd backend
-   chmod +x deploy.sh start.sh
-   ./deploy.sh
+   git clone <repository-url>
+   cd kmrl-sih
    ```
 
-2. **Configure environment:**
+2. **Backend Setup:**
    ```bash
-   cp env_template.txt .env
-   # Edit .env with your configuration
+   # Install Python dependencies
+   pip install -r requirements.txt
+   
+   # Setup environment variables
+   cp .env.template .env
+   cp .env.chat.template .env.chat
+   # Edit .env and .env.chat with your actual API keys and configuration
    ```
 
-3. **Start the server:**
+3. **Frontend Setup:**
    ```bash
-   ./start.sh
+   cd frontend
+   npm install
    ```
+
+4. **Start Qdrant (using Docker):**
+   ```bash
+   docker run -p 6333:6333 qdrant/qdrant
+   ```
+
+5. **Start the application:**
+   ```bash
+   # Backend (from root directory)
+   python chat_backend.py
+   
+   # Frontend (from frontend directory)
+   npm run dev
+   ```
+
+## 🔐 Security Configuration
+
+**IMPORTANT:** Never commit sensitive information to git!
+
+### Environment Files Setup
+
+1. Copy template files:
+   ```bash
+   cp .env.template .env
+   cp .env.chat.template .env.chat
+   cp config.py.template config.py
+   ```
+
+2. Update the following with your actual values in `.env.chat`:
+   ```env
+   GEMINI_API_KEY=your-actual-gemini-api-key
+   JWT_SECRET_KEY=your-secure-jwt-secret
+   ```
+
+3. The following files are already in `.gitignore` and should NEVER be committed:
+   - `.env`
+   - `.env.*`
+   - `config.py`
+   - `emails/alerts.json`
+   - Any file containing API keys or secrets
 
 ## 📁 Project Structure
 

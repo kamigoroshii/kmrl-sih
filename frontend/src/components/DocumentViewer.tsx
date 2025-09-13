@@ -7,6 +7,7 @@ interface DocumentViewerProps {
     id: string;
     name: string;
     type: string;
+    page?: number;
   } | null;
 }
 
@@ -21,7 +22,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   if (!isOpen || !document) return null;
 
   const getDocumentUrl = () => {
-    return `http://localhost:5001/api/documents/${encodeURIComponent(document.name)}/view`;
+    const baseUrl = `http://localhost:5001/api/documents/${encodeURIComponent(document.name)}/view`;
+    // For PDFs, add page fragment if page number is specified
+    if ((document.type === '.pdf' || document.name.toLowerCase().endsWith('.pdf')) && document.page) {
+      return `${baseUrl}#page=${document.page}`;
+    }
+    return baseUrl;
   };
 
   const isPdf = document.type === '.pdf' || document.name.toLowerCase().endsWith('.pdf');
